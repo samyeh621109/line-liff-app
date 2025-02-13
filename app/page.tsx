@@ -4,6 +4,7 @@ import { Profile as LineProfile } from '@liff/get-profile'
 import { Profile } from '@/components/ui/Profile'
 import { Button } from '@/components/ui/Button'
 import { initializeLiff } from '@/lib/liff'
+import { db, setDoc, doc } from '@/lib/firebase'
 
 export default function Home() {
   const [profile, setProfile] = useState<LineProfile | null>(null)
@@ -18,6 +19,7 @@ export default function Home() {
           setIsLoggedIn(true)
           const userProfile = await liff.getProfile()
           setProfile(userProfile)
+          await saveUserToFirestore(userProfile)
         }
       } catch {
         setError('LIFF 初始化失敗')
@@ -27,11 +29,15 @@ export default function Home() {
   }, [])
 
   const handleLogin = async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const liff = (window as any).liff
     try {
       if (!liff.isLoggedIn()) {
         liff.login()
+      } else {
+        const userProfile = await liff.getProfile()
+        setProfile(userProfile)
+        setIsLoggedIn(true)
+        await saveUserToFirestore(userProfile)
       }
     } catch {
       setError('登入失敗')
@@ -39,7 +45,6 @@ export default function Home() {
   }
 
   const handleLogout = () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const liff = (window as any).liff
     try {
       if (liff.isLoggedIn()) {
@@ -49,6 +54,21 @@ export default function Home() {
       }
     } catch {
       setError('登出失敗')
+    }
+  }
+
+  const saveUserToFirestore = async (user: LineProfile) => {
+    try {
+      await setDoc(doc(db, 'users', user.userId), {
+        userId: user.userId,
+        displayName: user.displayName,
+        pictureUrl: user.pictureUrl || '',
+        statusMessage: user.statusMessage || '',
+        timestamp: new Date(),
+      })
+    } catch (err) {
+      console.error('Firestore 儲存失敗', err)
+      setError('資料儲存失敗')
     }
   }
 
