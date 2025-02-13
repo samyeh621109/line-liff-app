@@ -5,6 +5,7 @@ import { Profile } from '@/components/ui/Profile'
 import { Button } from '@/components/ui/Button'
 import { initializeLiff } from '@/lib/liff'
 import { db, setDoc, doc } from '@/lib/firebase'
+import type { Liff } from '@line/liff'
 
 export default function Home() {
   const [profile, setProfile] = useState<LineProfile | null>(null)
@@ -14,7 +15,7 @@ export default function Home() {
   useEffect(() => {
     const init = async () => {
       try {
-        const liff = await initializeLiff(process.env.NEXT_PUBLIC_LIFF_ID as string)
+        const liff: Liff = await initializeLiff(process.env.NEXT_PUBLIC_LIFF_ID as string)
         if (liff.isLoggedIn()) {
           setIsLoggedIn(true)
           const userProfile = await liff.getProfile()
@@ -29,7 +30,7 @@ export default function Home() {
   }, [])
 
   const handleLogin = async () => {
-    const liff = (window as any).liff
+    const liff = (window as unknown as { liff: Liff }).liff
     try {
       if (!liff.isLoggedIn()) {
         liff.login()
@@ -45,7 +46,7 @@ export default function Home() {
   }
 
   const handleLogout = () => {
-    const liff = (window as any).liff
+    const liff = (window as unknown as { liff: Liff }).liff
     try {
       if (liff.isLoggedIn()) {
         liff.logout()
