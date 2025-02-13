@@ -54,7 +54,7 @@ export default function Home() {
 
   return (
     <main className="p-4">
-      <h1 className="text-2xl font-bold mb-4">LINE LIFF 應用</h1>
+      <h1 className="text-2xl font-bold mb-4">智聯辦公系統</h1>
       
       {error && <p className="text-red-500 mb-4">{error}</p>}
       
