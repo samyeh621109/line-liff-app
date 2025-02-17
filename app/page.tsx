@@ -57,7 +57,7 @@ export default function Home() {
       setError('登出失敗')
     }
   }
-
+    
   const saveUserToFirestore = async (user: LineProfile) => {
     try {
       await setDoc(doc(db, 'users', user.userId), {
