@@ -15,39 +15,41 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    if (!process.env.NEXT_PUBLIC_LIFF_ID) {
-      setError('LIFF ID 未設定')
-      setIsLoading(false)
-      return
-    }
+  const liffId = process.env.NEXT_PUBLIC_LIFF_ID
+  if (!liffId) {
+    setError('LIFF ID 未設定')
+    setIsLoading(false)
+    return
+  }
 
-    if (!db) {
-      setError('資料庫連線失敗')
-      setIsLoading(false)
-      return
-    }
+  if (!db) {
+    setError('資料庫連線失敗')
+    setIsLoading(false)
+    return
+  }
 
-    const init = async () => {
-      try {
-        const liffInstance = await initializeLiff(process.env.NEXT_PUBLIC_LIFF_ID)
-        setLiff(liffInstance)
+  const init = async () => {
+    try {
+      const liffInstance = await initializeLiff(liffId) // ✅ 這裡不會再報錯
+      setLiff(liffInstance)
 
-        if (liffInstance.isLoggedIn()) {
-          setIsLoggedIn(true)
-          const userProfile = await liffInstance.getProfile()
-          setProfile(userProfile)
-          await saveUserToFirestore(userProfile)
-        }
-      } catch (err) {
-        console.error('初始化錯誤:', err)
-        setError('LIFF 初始化失敗')
-      } finally {
-        setIsLoading(false)
+      if (liffInstance.isLoggedIn()) {
+        setIsLoggedIn(true)
+        const userProfile = await liffInstance.getProfile()
+        setProfile(userProfile)
+        await saveUserToFirestore(userProfile)
       }
+    } catch (err) {
+      console.error('初始化錯誤:', err)
+      setError('LIFF 初始化失敗')
+    } finally {
+      setIsLoading(false)
     }
+  }
 
-    init()
-  }, [])
+  init()
+}, [])
+
 
   const handleLogin = async () => {
     if (!liff) {
